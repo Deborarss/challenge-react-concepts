@@ -1,47 +1,44 @@
-import React, { useEffect, useState } from "react";
-import api from "./services/api";
+import React, { useEffect, useState, useCallback } from 'react';
 
 import "./styles.css";
 
-function App() {
+import api from 'services/api';
+
+const App = () => {
   const [repositories, setRepositories] = useState([]);
-
+  
   useEffect(() => {
-    api.get('repositories').then(res => {
-      console.log(res);
-      setRepositories(res.data);
+    api.get('repositories').then(response => {
+      setRepositories(response.data);
     })
-  }, []);
+  }, [])
 
-  async function handleAddRepository() {
-    const res = await api.post('repositories', {
-      title: "Backend com NodeJS",
-      url: "someURl",
-      techs: "NodeJS"
-    });
+  const handleAddSubmit = useCallback(async () => {
+    const response = await api.post('repositories', {
+        title: 'Learn Typescript',
+        url: "none",
+        techs: "Typescript",
+      });
 
-    const repository = res.data;
+      const repository = response.data;
+      setRepositories([...repositories, repository]);
+  }, [repositories]);
 
-    setRepositories([...repositories, repository]);
-  }
-
-  async function handleRemoveRepository(id) {
-    await api.delete(`repositories/${id}`, {});
-
+  const handleRemoveRepository = useCallback(async id => {
+    await api.delete(`repositories/${id}`, {})  
+    
     setRepositories(repositories.filter(repository => repository.id !== id ));
-  }
+    
+  }, [repositories]);
 
   return (
     <div>
-      <ul data-testid="repository-list">
-        {repositories.map(repository => <li key={repository.id} >{repository.title}<button onClick={() => handleRemoveRepository(repository.id)}>
-            Remover
-          </button> </li>) }
+      <ul>
+        {repositories.map(repository => <li key={repository.id}>{repository.title}<button onClick={() => handleRemoveRepository(repository.id)}>Remover</button></li>)} 
       </ul>
-
-      <button onClick={handleAddRepository}>Adicionar</button>
+      <button onClick={handleAddSubmit}>Adicionar</button>
     </div>
-  );
+  )
 }
 
 export default App;
